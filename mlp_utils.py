@@ -99,3 +99,49 @@ def initialize_population_uniform(population_size, total_weights):
 
     return population
 
+#CROSSOVERS
+
+def one_point_crossover(parent1, parent2):
+    k = random.randint(1, len(parent1) - 1)
+
+    child1 = np.concatenate([parent1[:k], parent2[k:]])
+    child2 = np.concatenate([parent2[:k], parent1[k:]])
+
+    return child1, child2
+
+#dochat
+def multi_point_crossover(parent1, parent2, n_points=2):
+    size = len(parent1)
+    # pick n_points unique cut points (not first or last index)
+    points = sorted(random.sample(range(1, size), n_points))
+
+    child1, child2 = parent1.copy(), parent2.copy()
+
+    # swap segments between every other pair of cut points
+    swap = False
+    prev = 0
+    for point in points + [size]:
+        if swap:
+            child1[prev:point] = parent2[prev:point]
+            child2[prev:point] = parent1[prev:point]
+        swap = not swap
+        prev = point
+
+    return child1, child2
+
+
+def geometric_semantic_crossover(parent1, parent2):
+    # TR: random vector with values in [0, 1]
+    TR = np.random.uniform(0, 1, len(parent1))
+
+    # T_XO = (T1 * TR) + ((1 - TR) * T2)
+    child = (parent1 * TR) + ((1 - TR) * parent2)
+
+    return child
+
+#oqueedtouatetarfazer
+def multi_point_crossover(parent1, parent2, n_points=2):
+    size = len(parent1)
+    # pick n_points unique cut points (not first or last index)
+    points = sorted(random.sample(range(1, size), n_points))
+
