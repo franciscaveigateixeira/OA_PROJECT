@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import cmath
 
 def count_weights(model):
     total = 0
@@ -104,44 +105,40 @@ def initialize_population_uniform(population_size, total_weights):
 def one_point_crossover(parent1, parent2):
     k = random.randint(1, len(parent1) - 1)
 
-    child1 = np.concatenate([parent1[:k], parent2[k:]])
-    child2 = np.concatenate([parent2[:k], parent1[k:]])
-
-    return child1, child2
-
-#dochat
-def multi_point_crossover(parent1, parent2, n_points=2):
-    size = len(parent1)
-    # pick n_points unique cut points (not first or last index)
-    points = sorted(random.sample(range(1, size), n_points))
-
-    child1, child2 = parent1.copy(), parent2.copy()
-
-    # swap segments between every other pair of cut points
-    swap = False
-    prev = 0
-    for point in points + [size]:
-        if swap:
-            child1[prev:point] = parent2[prev:point]
-            child2[prev:point] = parent1[prev:point]
-        swap = not swap
-        prev = point
+    child1 = [parent1[:k]+ parent2[k:]]
+    child2 = [parent2[:k]+ parent1[k:]]
 
     return child1, child2
 
 
-def geometric_semantic_crossover(parent1, parent2):
-    # TR: random vector with values in [0, 1]
-    TR = np.random.uniform(0, 1, len(parent1))
+#we use arithmetical instead of geometric,beacause weights could
+#be negative,and since geometric uses exponents it would not work
 
-    # T_XO = (T1 * TR) + ((1 - TR) * T2)
-    child = (parent1 * TR) + ((1 - TR) * parent2)
+def arithmetical_crossover(parent1, parent2):
+    # alpha: random vector with values in [0, 1]
+    alpha = np.random.uniform(0, 1, len(parent1))
+
+
+    child = (parent1 * alpha) + ((1 - alpha) * parent2)
 
     return child
 
-#oqueedtouatetarfazer
-def multi_point_crossover(parent1, parent2, n_points=2):
-    size = len(parent1)
-    # pick n_points unique cut points (not first or last index)
-    points = sorted(random.sample(range(1, size), n_points))
+#The arithmetical crossover with alpha = 0.5 is a clear example
+#of an exploitative crossover operator. Contrarily, this
+#operator will show exploration for alpha > 1 or alpha < 0
 
+#othercrossover:
+#-Blend Crossover (BLX-α)
+
+#Laplace crossover
+
+def laplace_crossover(parent1, parent2, a, b):
+   u = random.random()
+   if u <= 1/2:
+       beta = a-b*log(u)
+    else:
+       beta = a+b*log(u)
+
+    child1=parent1+beta*abs(parent1-parent2)
+
+    child2=parent2+beta*abs(parent1-parent2)
