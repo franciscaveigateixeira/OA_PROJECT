@@ -1,6 +1,6 @@
 import random
 import numpy as np
-import cmath
+import math
 
 def count_weights(model):
     total = 0
@@ -133,12 +133,14 @@ def arithmetical_crossover(parent1, parent2):
 #Laplace crossover
 
 def laplace_crossover(parent1, parent2, a, b):
-   u = random.random()
-   if u <= 1/2:
-       beta = a-b*log(u)
-    else:
-       beta = a+b*log(u)
+    u = np.random.uniform(0, 1, len(parent1))
+   # 2. Calcular o vetor beta seguindo estritamente a Equação (3) da imagem
+    # np.where(condição, valor_se_verdadeiro, valor_se_falso)
+    beta = np.where(u <= 0.5, 
+                    a - b * np.log(u), 
+                    a + b * np.log(u))
+    child1=parent1+beta*np.abs(parent1-parent2)
 
-    child1=parent1+beta*abs(parent1-parent2)
-
-    child2=parent2+beta*abs(parent1-parent2)
+    child2=parent2+beta*np.abs(parent1-parent2)
+   
+    return child1, child2
