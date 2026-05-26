@@ -14,13 +14,10 @@ def count_weights(model):
     return total
 
 def generate_solution(total_weights):
-    solution = []
-
-    for i in range(total_weights):
-        value = random.uniform(-1, 1)
-        solution.append(value)
-
-    return np.array(solution)
+    """
+    Generates a random weight vector of size total_weights with values in [-1, 1]
+    """
+    return np.random.uniform(-1, 1, total_weights)
 
 def vector_to_weights(vector, layer_sizes):
     """
@@ -109,18 +106,39 @@ def initialize_population_uniform(population_size, total_weights):
 
     return population
 
+def initialize_population_he(population_size, layer_sizes):
+    population = []
+
+    for _ in range(population_size):
+        vector = np.array([])
+        for i in range(len(layer_sizes) - 1):
+            n_inlayer = layer_sizes[i] #number of neurons in the current layer
+            std = np.sqrt(2 / n_inlayer)
+            
+            #weights are initialized with normal distribution
+            w = np.random.normal(0, std, n_inlayer * layer_sizes[i + 1])
+            #bias are initialized with zeros
+            b = np.zeros(layer_sizes[i + 1])
+            
+            vector = np.concatenate([vector, w, b])
+
+        population.append(vector)
+
+    return population
+
+
 #CROSSOVERS
 
 def one_point_crossover(parent1, parent2):
     k = random.randint(1, len(parent1) - 1)
 
-    child1 = [parent1[:k]+ parent2[k:]]
-    child2 = [parent2[:k]+ parent1[k:]]
+    child1 = np.concatenate([parent1[:k], parent2[k:]])
+    child2 = np.concatenate([parent2[:k], parent1[k:]])
 
     return child1, child2
 
 
-#we use arithmetical instead of geometric,beacause weights could
+#we use arithmetical instead of geometric,because weights could
 #be negative,and since geometric uses exponents it would not work
 
 def arithmetical_crossover(parent1, parent2):
@@ -128,9 +146,10 @@ def arithmetical_crossover(parent1, parent2):
     alpha = np.random.uniform(0, 1, len(parent1))
 
 
-    child = (parent1 * alpha) + ((1 - alpha) * parent2)
+    child1 = (parent1 * alpha) + ((1 - alpha) * parent2)
+    child2 = (parent2 * alpha) + ((1 - alpha) * parent1)
 
-    return child
+    return child1, child2
 
 #The arithmetical crossover with alpha = 0.5 is a clear example
 #of an exploitative crossover operator. Contrarily, this

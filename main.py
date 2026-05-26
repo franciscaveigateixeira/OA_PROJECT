@@ -26,7 +26,7 @@ if __name__=='__main__':
     OUTPUT_SIZE  = 1    #target variable
     layer_sizes  = [INPUT_SIZE] + list(HIDDEN_SIZES) + [OUTPUT_SIZE]
 
-    mlp = MLPClassifier(hidden_layer_sizes=HIDDEN_SIZES,   #inputs -> 16 neurons -> 8 neurons -> 1 output
+    mlp = MLPClassifier(hidden_layer_sizes=HIDDEN_SIZES,    
                         activation="relu",
                         max_iter=1,
                         warm_start = False,
