@@ -1,25 +1,22 @@
 import numpy as np
 from mlp_utils import fitness_function, initialize_population_uniform, initialize_population_he
 
-def differential_evolution(population_size, total_weights, generations, F, CR, model, layer_sizes, X, y, initialization):
+def differential_evolution(population_size, total_weights, generations, F, CR, model, layer_sizes, X, y, initialization, fitness_function):
     """
     Differential Evolution algorithm
     F: scaling factor (mutation)
     CR: crossover rate
-    initialization: "uniform" or "he"
     """
 
     # Initialize population
-    if initialization == "uniform":
-        population = initialize_population_uniform(population_size, total_weights)
-    elif initialization == "he":
-        population = initialize_population_he(population_size, layer_sizes)
+
+    population = initialization(population_size, total_weights, layer_sizes)
         
     fitness = [fitness_function(ind, model, layer_sizes, X, y) for ind in population]
 
     for gen in range(generations):
         new_population = []
-
+    
         for i in range(population_size):
             # Pick 3 random individuals different from i and from each other
             candidates = list(range(population_size))
@@ -37,7 +34,7 @@ def differential_evolution(population_size, total_weights, generations, F, CR, m
                     trial[j] = population[c][j] + F * (population[a][j] - population[b][j])
                 j = (j + 1) % total_weights
 
-            # Selection — keep the better one (maximization)
+            # Selection — keep the one with better fitness
             trial_fitness = fitness_function(trial, model, layer_sizes, X, y)
             if trial_fitness >= fitness[i]:
                 new_population.append(trial)
