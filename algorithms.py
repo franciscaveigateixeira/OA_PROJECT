@@ -1,6 +1,42 @@
 import numpy as np
 from mlp_utils import fitness_function, initialize_population_uniform, initialize_population_he
 
+#Genetic Algorithm
+def genetic_algorithm(initialization, fitness_function, selection, crossover, mutation, pop_size, n_iter, mutation_rate, total_weights, layer_sizes, model, X, y):
+
+    population = initialization(pop_size, total_weights, layer_sizes)
+    fitness = [fitness_function(ind, model, layer_sizes, X, y) for ind in population]
+    history = []
+
+
+    winner_index = np.argmax(fitness)
+    best_solution, best_fitness = population[winner_index], fitness[winner_index]
+    history.append(best_fitness)
+
+    for i in range(n_iter):
+        new_population = []
+
+        #elitism
+        while len(new_population) < pop_size:
+            parent1,parent2 = selection(population, fitness), selection(population, fitness)
+            child1,child2 = crossover(parent1,parent2)
+            child1,child2 = mutation(child1,mutation_rate), mutation(child2,mutation_rate)
+            new_population.extend([child1,child2])
+
+        population = new_population
+        fitness = [fitness_function(ind, model, layer_sizes, X, y) for ind in population]
+        winner_index = np.argmax(fitness)
+
+        if fitness[winner_index] > best_fitness:
+            best_solution, best_fitness = population[winner_index], fitness[winner_index]
+
+        history.append(best_fitness)
+
+    return best_solution, history
+
+
+
+#Differential Evolution
 def differential_evolution(population_size, total_weights, generations, F, CR, model, layer_sizes, X, y, initialization, fitness_function):
     """
     Differential Evolution algorithm

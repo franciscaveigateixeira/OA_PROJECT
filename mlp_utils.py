@@ -94,19 +94,19 @@ def fitness_function(solution, model, layer_sizes, X, y):
 
 #------ GENETIC OPERATORS ------
 
-def initialize_population_uniform(population_size, total_weights):
+def initialize_population_uniform(population_size, total_weights, layer_sizes, generate = generate_solution):
 
     population = []
 
     for i in range(population_size):
 
-        solution = generate_solution(total_weights)
+        solution = generate(total_weights)
 
         population.append(solution)
 
     return population
 
-def initialize_population_he(population_size, layer_sizes):
+def initialize_population_he(population_size, total_weights, layer_sizes):
     population = []
 
     for _ in range(population_size):
