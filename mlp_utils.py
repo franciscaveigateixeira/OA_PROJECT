@@ -175,43 +175,106 @@ def laplace_crossover(parent1, parent2, a, b):
 
 #MUTATIONS
 ##uniform mutation
-def uniform_mutation(individual, mutation_rate, lb=-1.0, ub=1.0):
+#------ MUTATIONS ------
+
+def gaussian_mutation(solution, pm, sigma=0.1, xl=-1.0, xu=1.0):
     """
-    Uniform Mutation for real-valued vectors.
- 
-    Adapted from the binary version (Algorithm 9.6, where bits are negated):
-    instead of flipping a bit, each gene is replaced by a new random value
-    drawn uniformly from [lb, ub].
- 
-    For each gene j:
-        if U(0,1) <= pm:
-            x_j = U(lb, ub)
- 
+    Gaussian mutation.
+
+    For each gene in the solution, with probability pm, adds noise
+    sampled from a Normal distribution N(0, sigma). The result is
+    clipped to [xl, xu] to keep weights inside the valid range.
+
     Parameters
     ----------
-    individual    : numpy array — the weight vector to mutate
-    mutation_rate : float — probability of mutating each gene (pm)
-    lb            : float — lower bound of the weight range (default -1.0)
-    ub            : float — upper bound of the weight range (default  1.0)
- 
+    solution : np.ndarray
+        Current weight vector.
+    pm : float
+        Probability of mutating each gene. Typical value: 1 / len(solution).
+    sigma : float
+        Standard deviation of the Gaussian noise. Controls how large the
+        perturbation can be. Default: 0.1.
+    xl : float
+        Lower bound for clipping. Default: -1.0
+    xu : float
+        Upper bound for clipping. Default:  1.0
+
     Returns
     -------
-    mutant : numpy array — the (possibly) mutated individual
+    np.ndarray
+        Mutated weight vector, clipped to [xl, xu].
     """
-    mutant = np.copy(individual)
-    for j in range(len(mutant)):
-        if np.random.uniform(0, 1) <= mutation_rate:
-            mutant[j] = np.random.uniform(lb, ub)
-    return mutant
+    mutated = np.copy(solution).astype(float)
 
-##gaussian mutation
-def gaussian_mutation(individual, mutation_rate, sigma=0.1):
+    for i in range(len(mutated)):
+        if np.random.uniform() < pm:
+            mutated[i] += np.random.normal(0, sigma)
+            mutated[i] = np.clip(mutated[i], xl, xu)
+
+    return mutated
+
+
+def polynomial_mutation(solution, pm, eta_m=20, xl=-1.0, xu=1.0):
     """
-    Standard Gaussian mutation: each gene is perturbed with probability
-    mutation_rate by adding noise ~ N(0, sigma).
+    Polynomial mutation (Algorithm 2, Carles-Bou & Galan, 2023).
+
+    For each gene in the solution, with probability pm, computes a
+    perturbation delta_q using the polynomial distribution. The key
+    parameter eta_m controls how aggressive the mutation is:
+      - small eta_m  ->  large jumps, more exploration
+      - large eta_m  ->  tiny steps, fine-tuning near the current value
+
+    The perturbation is computed in two steps:
+      1. Measure how far the current value x sits from each bound:
+            delta1 = (x - xl) / (xu - xl)   <- normalised distance to lower bound
+            delta2 = (xu - x) / (xu - xl)   <- normalised distance to upper bound
+      2. Draw r ~ Uniform(0, 1) and apply the polynomial formula:
+            if r <= 0.5:
+                delta_q = [2r + (1-2r)(1-delta1)^(eta_m+1)]^(1/(eta_m+1)) - 1
+            else:
+                delta_q = 1 - [2(1-r) + 2(r-0.5)(1-delta2)^(eta_m+1)]^(1/(eta_m+1))
+
+         Then: x_new = x + delta_q * (xu - xl)
+
+    The formula is asymmetric on purpose: if x is close to the lower bound,
+    the left branch (r <= 0.5) produces small steps, protecting the bound.
+    Same logic applies near the upper bound with the right branch.
+    The result is repaired with clip() so it always stays in [xl, xu].
+
+    Parameters
+    ----------
+    solution : np.ndarray
+        Current weight vector.
+    pm : float
+        Probability of mutating each gene. Typical value: 1 / len(solution).
+    eta_m : float
+        Distribution index. Typical range: 5-100. Default: 20.
+    xl : float
+        Lower bound. Default: -1.0
+    xu : float
+        Upper bound. Default:  1.0
+
+    Returns
+    -------
+    np.ndarray
+        Mutated weight vector, clipped to [xl, xu].
     """
-    mutant = np.copy(individual)
-    for i in range(len(mutant)):
-        if np.random.uniform() < mutation_rate:
-            mutant[i] += np.random.normal(0, sigma)
-    return mutant
+    mutated = np.copy(solution).astype(float)
+
+    for i in range(len(mutated)):
+        if np.random.uniform() < pm:
+            x = mutated[i]
+
+            delta1 = (x - xl) / (xu - xl)
+            delta2 = (xu - x) / (xu - xl)
+
+            r = np.random.uniform()
+
+            if r <= 0.5:
+                delta_q = (2*r + (1 - 2*r) * (1 - delta1)**(eta_m + 1))**(1/(eta_m + 1)) - 1
+            else:
+                delta_q = 1 - (2*(1 - r) + 2*(r - 0.5) * (1 - delta2)**(eta_m + 1))**(1/(eta_m + 1))
+
+            mutated[i] = np.clip(x + delta_q * (xu - xl), xl, xu)
+
+    return mutated
