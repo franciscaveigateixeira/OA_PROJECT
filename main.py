@@ -59,3 +59,47 @@ if __name__=='__main__':
         )
 
         print(f"Solution {i + 1}: {fitness}")
+
+results_gridsearch= pd.DataFrame(columns = ['initialization','selection','crossover','mutation','mutation_rate','train_fitness'])
+
+initialization=[initialize_population_uniform,initialize_population_he]
+selection=[tournament_selection,]
+crossover=[arithmetical_crossover,laplace_crossover]
+mutation=[  ]
+mutation_rate=[0.1,0.05,0.01]
+
+for ini in initialization:
+    for sel in selection:
+        for cro in crossover:
+            for mut in mutation:
+                for mut_rate in mutation_rate:
+                sum_result=0
+                    for n in range(30):
+                        random.seed(i)
+                        best_solution, history = genetic_algorithm(
+                            initialization_func=ini,     
+                            fitness_func=fitness_function, 
+                            selection_func=sel,         
+                            crossover_func=cro,          
+                            mutation_func=mut,           
+                            pop_size=100, 
+                            n_iter=30, 
+                            total_weights=total_weights, 
+                            layer_sizes=layer_sizes, 
+                            model=mlp, 
+                            X=X_train, y=y_train
+                        )
+
+                        sum_result+=history[-1]
+
+                new_row = {
+                    'initialization': ini.__name__,
+                    'selection': sel.__name__,
+                    'crossover': cro.__name__,
+                    'mutation': mut.__name__,
+                    'mutation rate': mut_rate.__name__,
+                    'avg_fitness': sum_result/30
+                    }
+                results_gridsearch = results_gridsearch.append(new_row, ignore_index = True)
+
+results_gridsearch.to_csv('ga_gridsearch.csv', index=False)
