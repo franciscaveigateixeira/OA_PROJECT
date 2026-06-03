@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 def tournament_selection(population, fitnesses, tournament_size=3):
 
+=======
+import random
+import numpy as np
+
+def tournament_selection(population, fitnesses, tournament_size=3,maximize=True):
+>>>>>>> 91e89e7b0c50f533535d8affaabcff2eac576659
 
     sample = random.choices([i for i in range(len(population))],k = tournament_size)
     sample_fitnesses = [fitnesses[i] for i in sample]

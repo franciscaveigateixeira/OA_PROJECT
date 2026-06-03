@@ -1,6 +1,6 @@
 import random
 import numpy as np
-import math
+import matplotlib.pyplot as plt
 
 def count_weights(model):
     total = 0
@@ -170,3 +170,13 @@ def laplace_crossover(parent1, parent2, a, b):
     child2=parent2+beta*np.abs(parent1-parent2)
    
     return child1, child2
+
+
+#plot
+
+def plot_history(history , title =" Fitness over Iterations "):
+    plt.plot(history)
+    plt.xlabel("Generations")
+    plt.ylabel("Fitness")
+    plt.title(title)
+    plt.show()

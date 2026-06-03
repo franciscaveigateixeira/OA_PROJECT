@@ -23,7 +23,7 @@ def genetic_algorithm(initialization, fitness_function, selection, crossover, mu
             child1,child2 = mutation(child1,mutation_rate), mutation(child2,mutation_rate)
             new_population.extend([child1,child2])
 
-        population = new_population
+        population = new_population[:pop_size] 
         fitness = [fitness_function(ind, model, layer_sizes, X, y) for ind in population]
         winner_index = np.argmax(fitness)
 
