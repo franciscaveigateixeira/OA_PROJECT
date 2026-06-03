@@ -1,5 +1,6 @@
 import numpy as np
-from mlp_utils import fitness_function, initialize_population_uniform, initialize_population_he
+from mlp_utils import fitness_function
+
 
 #Genetic Algorithm
 def genetic_algorithm(initialization, fitness_function, selection, crossover, mutation, pop_size, n_iter, mutation_rate, total_weights, layer_sizes, model, X, y):
