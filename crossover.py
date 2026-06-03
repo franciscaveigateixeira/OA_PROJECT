@@ -24,18 +24,15 @@ def arithmetical_crossover(parent1, parent2):
 #of an exploitative crossover operator. Contrarily, this
 #operator will show exploration for alpha > 1 or alpha < 0
 
-#othercrossover:
-#-Blend Crossover (BLX-α)
-
 #Laplace crossover
 
-def laplace_crossover(parent1, parent2, a, b):
+def laplace_crossover(parent1, parent2, a=0.0, b=0.1):
     u = np.random.uniform(0, 1, len(parent1))
-   # 2. Calcular o vetor beta seguindo estritamente a Equação (3) da imagem
-    # np.where(condição, valor_se_verdadeiro, valor_se_falso)
+
+    #Adjusted for computational symmetry to prevent genetic stagnation
     beta = np.where(u <= 0.5, 
-                    a - b * np.log(u), 
-                    a + b * np.log(u))
+                a - b * np.log(u), 
+                a - b * np.log(1 - u)
     child1=parent1+beta*np.abs(parent1-parent2)
 
     child2=parent2+beta*np.abs(parent1-parent2)
