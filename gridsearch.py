@@ -1,12 +1,16 @@
 import random
+import pandas as pd
 from algorithms import genetic_algorithm
+from selections import initialize_population_uniform, initialize_population_he
+from initializations import tournament_selection, split_rank_selection
+from crossover import one_point_crossover, arithmetical_crossover, laplace_crossover
+from mutations import gaussian_mutation, polynomial_mutation
 
-results_gridsearch.to_csv('ga_gridsearch.csv', index=False)
 
 results_gridsearch = pd.DataFrame(columns=['initialization', 'selection', 'crossover', 'mutation', 'mutation_rate', 'avg_fitness'])
 
 initialization = [initialize_population_uniform, initialize_population_he]
-selection      = [tournament_selection, other_selection]
+selection      = [tournament_selection, split_rank_selection]
 crossover      = [one_point_crossover, arithmetical_crossover, laplace_crossover]
 mutation       = [gaussian_mutation, polynomial_mutation]
 mutation_rate  = [0.1, 0.05, 0.01]
