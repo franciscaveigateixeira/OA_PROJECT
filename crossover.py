@@ -35,7 +35,7 @@ def laplace_crossover(parent1, parent2, a=0.0, b=0.1):
     #Adjusted for computational symmetry to prevent genetic stagnation
     beta = np.where(u <= 0.5, 
                 a - b * np.log(u), 
-                a - b * np.log(1 - u)
+                a - b * np.log(1 - u))
     child1=parent1+beta*np.abs(parent1-parent2)
 
     child2=parent2+beta*np.abs(parent1-parent2)
