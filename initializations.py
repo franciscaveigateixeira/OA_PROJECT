@@ -1,3 +1,6 @@
+from mlp_utils import generate_solution
+import numpy as np
+
 def initialize_population_uniform(population_size, total_weights, layer_sizes, generate = generate_solution):
 
     population = []
