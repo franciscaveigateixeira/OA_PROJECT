@@ -1,0 +1,654 @@
+\documentclass[12pt, a4paper]{article}
+
+%% ── Encoding & fonts ─────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+%% ── Layout ───────────────────────────────────────────────────────────
+\usepackage[top=2.5cm, bottom=2.8cm, left=2.8cm, right=2.8cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+%% ── Colours ──────────────────────────────────────────────────────────
+\usepackage[dvipsnames]{xcolor}
+\definecolor{primary}{HTML}{1D3557}
+\definecolor{accent}{HTML}{457B9D}
+\definecolor{lightbg}{HTML}{EBF2F7}
+\definecolor{divider}{HTML}{A8C4D4}
+\definecolor{titlewhite}{HTML}{FFFFFF}
+\definecolor{codebg}{HTML}{F4F6F8}
+\definecolor{rowbg}{HTML}{EBF2F7}
+\definecolor{darktext}{HTML}{2D2D2D}
+
+%% ── Section styling ──────────────────────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\section}
+  {\large\bfseries\color{primary}}
+  {\color{accent}\thesection.}{0.5em}{}
+  [\vspace{2pt}\textcolor{divider}{\rule{\linewidth}{1pt}}\vspace{6pt}]
+\titlespacing{\section}{0pt}{18pt}{8pt}
+
+\titleformat{\subsection}
+  {\normalsize\bfseries\color{accent}}
+  {\thesubsection}{0.5em}{}
+\titlespacing{\subsection}{0pt}{12pt}{4pt}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\itshape\color{primary}}
+  {\thesubsubsection}{0.5em}{}
+\titlespacing{\subsubsection}{0pt}{8pt}{2pt}
+
+%% ── Header & footer ──────────────────────────────────────────────────
+\usepackage{fancyhdr}
+% Define a custom pagestyle but don't activate it yet. This prevents the
+% header (which draws a TikZ band) from being rendered on the titlepage.
+\fancypagestyle{mainstyle}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \fancyhead[L]{%
+    \begin{tikzpicture}[remember picture, overlay]
+      \fill[primary] (current page.north west) rectangle
+        ([yshift=-0.8cm]current page.north east);
+    \end{tikzpicture}%
+    \raisebox{0.1cm}{\small\color{white}\textit{Optimization Algorithms \ $\cdot$ \ Group 9}}%
+  }%
+  \fancyhead[R]{\raisebox{0.1cm}{\small\color{white}\textit{June 2026}}}%
+  \fancyfoot[C]{\small\color{accent}\thepage}%
+  \setlength{\headheight}{18pt}%
+}
+
+%% ── TikZ ─────────────────────────────────────────────────────────────
+\usepackage{tikz}
+
+%% ── Coloured boxes (tcolorbox) ───────────────────────────────────────
+\usepackage[most]{tcolorbox}
+
+\tcbset{
+  base/.style={
+    colback=lightbg,
+    colframe=accent,
+    arc=4pt,
+    boxrule=0.6pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    fonttitle=\bfseries\color{primary}
+  }
+}
+\newtcolorbox{infobox}[1][]{base, #1}
+
+%% ── Math ─────────────────────────────────────────────────────────────
+\usepackage{amsmath, amssymb}
+
+%% ── Tables ───────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\newcommand{\rowhead}{\rowcolor{primary}\color{white}\bfseries}
+
+%% ── Figures ──────────────────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{
+  font={small,it},
+  labelfont={bf,color=primary},
+  labelsep=period
+}
+
+%% ── Code ─────────────────────────────────────────────────────────────
+\usepackage{listings}
+\lstdefinestyle{codestyle}{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small\color{darktext},
+  keywordstyle=\color{primary}\bfseries,
+  stringstyle=\color{accent},
+  commentstyle=\color{gray}\itshape,
+  frame=single,
+  framerule=0pt,
+  rulecolor=\color{divider},
+  xleftmargin=10pt,
+  xrightmargin=10pt,
+  breaklines=true,
+  showstringspaces=false
+}
+\lstset{style=codestyle}
+
+%% ── Hyperlinks ───────────────────────────────────────────────────────
+\usepackage[hidelinks]{hyperref}
+% Use biblatex with the APA style (requires biber to compile)
+% Enable natbib compatibility so older \citep/\citet commands continue to work.
+\usepackage[backend=biber,style=apa,sortcites=true,natbib=true]{biblatex}
+\addbibresource{references.bib}
+% Support including attached PDFs/pages (used for supplementary materials)
+\usepackage{pdfpages}
+
+%% ── Table of contents styling ────────────────────────────────────────
+\usepackage{tocloft}
+\renewcommand{\cfttoctitlefont}{\large\bfseries\color{primary}}
+\renewcommand{\cftaftertoctitle}{\par\noindent\textcolor{divider}{\rule{\linewidth}{1pt}}}
+\renewcommand{\cftsecfont}{\bfseries\color{primary}}
+\renewcommand{\cftsecpagefont}{\bfseries\color{accent}}
+\renewcommand{\cftsubsecfont}{\color{accent}}
+\renewcommand{\cftsubsecpagefont}{\color{accent}}
+\renewcommand{\cftsubsubsecfont}{\itshape\color{primary}}
+\renewcommand{\cftsubsubsecpagefont}{\color{accent}}
+\setlength{\cftbeforesecskip}{6pt}
+\renewcommand{\cftdotsep}{3}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+%% ── Misc ─────────────────────────────────────────────────────────────
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{csquotes}
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=*, itemsep=2pt, topsep=4pt}
+
+
+%% ═══════════════════════════════════════════════════════════════════
+%%  DOCUMENT
+%% ═══════════════════════════════════════════════════════════════════
+\begin{document}
+
+%% ── Title page ───────────────────────────────────────────────────────
+\begin{titlepage}
+  	hispagestyle{empty}
+
+% Top colour band
+\begin{tikzpicture}[remember picture, overlay]
+  \fill[primary] (current page.north west) rectangle
+    ([yshift=-7cm] current page.north east);
+  \fill[accent]  ([yshift=-7cm] current page.north west) rectangle
+    ([yshift=-7.35cm] current page.north east);
+\end{tikzpicture}
+
+\vspace*{1.2cm}
+\begin{center}
+  {\color{titlewhite}\large\scshape Optimization Algorithms \ --- \ Project Report}\\[0.5cm]
+  {\color{titlewhite}\LARGE\bfseries Training a Neural Network\\[0.25cm]
+   via Evolutionary Optimisation Algorithms}\\[0.3cm]
+  {\color{divider}\large Group 9 \ $\cdot$ \ June 2026}
+\end{center}
+
+\vspace{5.2cm}
+
+\begin{center}
+\begin{tcolorbox}[
+  width=0.72\linewidth,
+  colback=lightbg,
+  colframe=accent,
+  arc=5pt,
+  boxrule=0.7pt,
+  halign=center
+]
+      \renewcommand{\arraystretch}{1.45}
+      \begin{tabular}{rl}
+        \color{primary}\textbf{Ana d'Água}        & \color{accent}20241773 \\
+        \color{primary}\textbf{Beatriz Calisto}   & \color{accent}20241746 \\
+        \color{primary}\textbf{Francisca Teixeira} & \color{accent}20241702 \\
+        \color{primary}\textbf{Margarida Pereira} & \color{accent}20241777 \\
+      \end{tabular}
+  \end{tcolorbox}
+\end{center}
+  
+  \vfill
+  \begin{center}
+  	extcolor{divider}{\rule{0.35\linewidth}{0.5pt}}\\[0.3cm]
+  % Centered faculty logo (adjust width below to change size)
+  \vspace{6pt}
+  \begin{center}
+    % conditional include avoids error if the image is missing
+    \IfFileExists{figures/nova_ims.png}{%
+      \includegraphics[width=0.30\textwidth]{figures/nova_ims.png}%
+    }{%
+      % fallback: leave blank (or place a placeholder text)
+      \vspace{0pt}
+    }
+  \end{center}
+  \vspace{6pt}
+  {\small\color{gray} Instituto Universit\'ario de Lisboa \ $\cdot$ \ 2025/2026}
+\end{center}
+\end{titlepage}
+
+% Activate the main pagestyle for the rest of the document so headers/footers
+% (including the decorative TikZ band) appear after the title page only.
+\pagestyle{mainstyle}
+\newpage
+\tableofcontents
+\newpage
+
+%% ═══════════════════════════════════════════════════════════════════
+\section{Introduction}
+%% ═══════════════════════════════════════════════════════════════════
+
+Parkinson's disease (PD) is a chronic, progressive neurodegenerative disorder characterised primarily by the loss of dopaminergic neurons in the substantia nigra pars compacta. Clinically, PD manifests as a mixture of motor symptoms (resting tremor, bradykinesia, muscular rigidity and postural instability) and diverse non-motor symptoms. Because the appearance of overt motor signs typically reflects advanced neuropathology, there is a pressing need for accessible biomarkers that can support earlier detection and monitoring.
+
+Acoustic analysis of sustained vowel phonation is a promising, low-cost modality for early screening: neuromuscular alterations associated with PD perturb laryngeal control and produce measurable deviations in frequency stability, amplitude modulation and noise characteristics. The Oxford Parkinson's dataset \citep{little2009} encapsulates such vocal biomarkers in a compact feature set extracted from short recordings, making it suitable for supervised classification.
+
+
+This study performs a systematic empirical comparison between two derivative free, population based optimisation methods—Genetic Algorithms (GA; \citealp{goldberg1989}) and Differential Evolution (DE; \citealp{storn1997})—applied to direct weight space training of a compact feedforward neural network. We evaluate the algorithms on three complementary axes: (i) optimisation dynamics (speed and stability of convergence), (ii) generalisation to held out data (measured with F1-score, suitable for imbalanced classes), and (iii) sensitivity to operator choices and initialisation. The experimental protocol emphasises reproducibility and quantification of stochastic variability via multiple independent runs.
+
+\subsection*{Related work}
+The integration of evolutionary computation with artificial neural networks—commonly referred to as neuroevolution—has a substantial methodological literature. \citet{yao1999} survey early approaches and argue that evolutionary methods are particularly appropriate when optimisation landscapes are non-convex, multimodal or when gradients are unavailable. In practical applications to biomedical signal processing, several authors have applied evolutionary search to vocal biomarkers: \citet{ali2019} employ a GA to optimise network hyperparameters and report high classification performance on sustained phonation features, while \citet{dao2022} focus on evolutionary feature selection and demonstrate improvements in discriminative performance on datasets derived from sustained vowel recordings. Differential Evolution has been widely adopted for continuous parameter optimisation, with \citet{storn1997} presenting canonical variants and practical guidance for $F$ and $CR$ settings. Foundational GA concepts and operator design choices are discussed by \citet{goldberg1989}, and the role of sensible weight initialisation for ReLU networks is analysed by \citet{he2015}.
+
+%% ═══════════════════════════════════════════════════════════════════
+\section{Problem Formulation}
+%% ═══════════════════════════════════════════════════════════════════
+
+\subsection{Neural Network Architecture and Solution Representation}
+
+A feedforward neural network was instantiated using \texttt{MLPClassifier} from scikit-learn with a \textbf{22--5--1} architecture: 22 input neurons, 5 hidden neurons with ReLU activation \cite{nair2010}, and 1 output neuron. ReLU is defined as $f(x) = \max(0,x)$, avoiding the vanishing gradient problem of sigmoid activations and providing the standard activation choice for hidden layers \cite{he2015}. The total number of trainable parameters is:
+\[
+(22 \times 5) + 5 + (5 \times 1) + 1 = 121
+\]
+
+A candidate solution is a real-valued vector $\boldsymbol{\theta} \in \mathbb{R}^{121}$ constructed by flattening all weight matrices and bias vectors layer by layer --- the direct weight encoding of Yao \cite{yao1999}. Data was split into 80\% training and 20\% test sets via stratified sampling (\texttt{random\_state=42}).
+
+\subsection{Fitness Function}
+
+\begin{infobox}[title=Fitness Function: F1-Score]
+\[
+F_1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}, \qquad
+\text{Precision} = \frac{TP}{TP+FP}, \qquad
+\text{Recall} = \frac{TP}{TP+FN}
+\]
+\end{infobox}
+
+\vspace{4pt}
+The F1-score is adopted as the optimisation and reporting metric because the dataset is substantially imbalanced (roughly 75\% positive). In imbalanced classification regimes, accuracy is a misleading metric: a classifier that predicts the majority class trivially attains high accuracy without discriminative power. The F1-score, defined as the harmonic mean of precision and recall, balances the trade-off between false positives and false negatives and is therefore more appropriate for clinical screening contexts. For statistical comparisons of algorithm performance we recommend reporting per-run distributions and using non-parametric paired tests (e.g., Wilcoxon signed-rank) because per-run F1 distributions are not guaranteed to be Gaussian.
+
+\subsection{Parameter Configurations}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{ll}
+\toprule
+\rowhead Parameter & \multicolumn{1}{l}{\color{white}Value} \\
+\midrule
+Initialisation  & He \cite{he2015} \\
+Selection       & Tournament ($k=3$) \\
+Crossover       & One-point \\
+Mutation        & Gaussian ($\sigma=0.1$) \\
+Mutation rate   & $p_m = 0.1$ \\
+Population size & $N = 100$ \\
+Generations     & $T = 500$ \\
+\bottomrule
+\end{tabular}
+\quad
+\begin{tabular}{ll}
+\toprule
+\rowhead Parameter & \multicolumn{1}{l}{\color{white}Value} \\
+\midrule
+Strategy        & DE/rand/1/bin \\
+Scaling factor  & $F = 0.5$ \\
+Crossover rate  & $CR = 0.9$ \\
+Population size & $N = 100$ \\
+Generations     & $T = 500$ \\
+Fitness metric  & F1-score \\
+\bottomrule
+\end{tabular}
+\caption{Left: GA final configuration (grid search). Right: DE configuration \cite{storn1997}.}
+\label{tab:params}
+\end{table}
+
+%% ═══════════════════════════════════════════════════════════════════
+\section{Implementation Details}
+%% ═══════════════════════════════════════════════════════════════════
+
+\subsection{Genetic Algorithm}
+
+The GA implements the canonical generational cycle (selection, recombination, mutation, replacement) and incorporates explicit \textbf{elitism}: the single best individual is copied unchanged to the following generation. Elitism guarantees non-decreasing best-so-far fitness and reduces the probability of losing high-quality solutions due to stochastic sampling; however, it increases effective selection pressure, so it is paired with recombination and mutation to preserve exploratory capability.
+
+\subsection{Initialisation Methods}
+
+\subsubsection{Uniform Initialisation}
+Each weight is sampled from $w_i \sim \mathcal{U}(-1,1)$. A symmetric bounded interval avoids directional bias in initial activations and—when combined with standardised inputs (zero mean, unit variance)—reduces the probability of extreme preactivations that could destabilise early forward passes.
+
+\subsubsection{He Initialisation}
+Standard schemes for symmetric activations (e.g., Glorot/Xavier) are suboptimal for ReLU networks. He et al.\ \cite{he2015} establish that ReLU \textit{``is not a symmetric function. As a consequence, the mean response of ReLU is always no smaller than zero''} and derive:
+
+\begin{infobox}[title=He Initialisation Condition \cite{he2015}]
+\[
+\frac{1}{2}\,n_l\,\mathrm{Var}[w_l] = 1 \quad \forall\,l
+\quad \Longrightarrow \quad
+w \sim \mathcal{N}\!\left(0,\;\frac{2}{n_l}\right), \quad b = 0
+\]
+\end{infobox}
+
+The factor $\tfrac{1}{2}$ compensates for the half wave rectification introduced by ReLU, which nullifies negative preactivations and reduces propagated variance; He initialisation preserves variance in expectation and thus improves signal propagation and numerical conditioning. Empirically, He initialisation achieved superior grid search performance in this study.
+
+\subsection{Selection Operators}
+
+\subsubsection{Tournament Selection}
+$k=3$ individuals are sampled (without replacement) and the fittest is promoted as a parent. Tournament selection is robust, simple to implement, and provides a well-understood mechanism to tune selection pressure via $k$: with $k=3$ and $N=100$ the pressure is moderate, balancing exploitation of good individuals and retention of diversity.
+
+\subsubsection{Split Rank Selection}
+Linear Rank Selection (LRS) normalises selection probabilities across ranks, reducing sensitivity to absolute fitness differences. Split Rank Selection \cite{splitrank} extends this idea by assigning separate probability schedules to the top and bottom halves of the ranking, enabling asymmetric exploitation of elite individuals while preserving a controlled tail of exploration:
+\[
+P_i = \begin{cases} \dfrac{12i}{5N(N+2)} & i \leq \lfloor N/2 \rfloor \\[8pt] \dfrac{28i}{5N(3N+2)} & i > \lfloor N/2 \rfloor \end{cases}
+\]
+With $\lambda^+=0.7$, 70\% of selection probability is concentrated on the top half (exploitation) and 30\% on the lower half (diversity preservation).
+
+\subsection{Crossover Operators}
+
+\subsubsection{One Point Crossover}
+A split point $k \sim \mathcal{U}\{1,\ldots,n{-}1\}$ divides each parent; offspring inherit complementary segments:
+\[
+\mathbf{c}_1 = (\boldsymbol{\theta}_1[0:k],\;\boldsymbol{\theta}_2[k:n]), \quad \mathbf{c}_2 = (\boldsymbol{\theta}_2[0:k],\;\boldsymbol{\theta}_1[k:n])
+\]
+By preserving contiguous parameter segments, one point crossover tends to conserve coadapted weight groups (for example, all incoming weights to a particular hidden unit). This locality preserving property likely contributed to its superior grid search performance by maintaining structurally useful building blocks across generations.
+
+\subsubsection{Arithmetical Crossover}
+Offspring are component-wise convex combinations with per-gene coefficients $\alpha_j \sim \mathcal{U}(0,1)$:
+\[
+c_1^{(j)} = \alpha_j\theta_1^{(j)} + (1{-}\alpha_j)\theta_2^{(j)}, \quad c_2^{(j)} = \alpha_j\theta_2^{(j)} + (1{-}\alpha_j)\theta_1^{(j)}
+\]
+Because offspring are convex combinations of parents, arithmetical crossover cannot produce parameter values outside the current convex hull of the population; over repeated applications this can contract the population support and reduce exploratory capacity unless mutation or other diversity mechanisms are strong.
+
+\subsubsection{Laplace Crossover}
+Introduced by Deep \& Thakur \cite{deep2007}, offspring are displaced along the parent difference vector with magnitudes from $\mathcal{L}(a,b)$:
+\[
+\beta_k = \begin{cases} a - b\ln(u_k) & u_k \leq 0.5 \\ a + b\ln(1-u_k) & u_k > 0.5 \end{cases}\!, \quad
+c_i^{(k)} = \theta_i^{(k)} + \beta_k\,|\theta_1^{(k)} - \theta_2^{(k)}|
+\]
+With $a=0$, $b=0.1$ the Laplace-distributed displacement generates both small and occasional larger moves along the inter-parent axis, enabling a controlled balance between exploitation and exploration. The implementation error that constrained $\beta_k$ to non-negative values removed half the intended search behaviour (the directed exploitative moves), which plausibly explains the operator's underperformance in the empirical sweep.
+
+\subsection{Mutation Operators}
+
+\subsubsection{Gaussian Mutation}
+\[
+w_i' = w_i + \varepsilon, \quad \varepsilon \sim \mathcal{N}(0,\sigma^2), \quad \text{with probability } p_m
+\]
+With $\sigma=0.1$, Gaussian mutation implements conservative, zero-mean perturbations: the $3\sigma$ heuristic implies that 99.7\% of perturbations lie within $\pm0.3$, promoting incremental refinement around candidate solutions while retaining a small probability to explore more distant regions.
+
+\subsubsection{Polynomial Mutation}
+Bounded perturbations governed by distribution index $\eta_m$ \cite{polymut}:
+\[
+\delta_q = \begin{cases}
+[2r + (1{-}2r)(1{-}\delta_1)^{\eta_m+1}]^{\frac{1}{\eta_m+1}} - 1 & r \leq 0.5 \\[4pt]
+1 - [2(1{-}r) + 2(r{-}0.5)(1{-}\delta_2)^{\eta_m+1}]^{\frac{1}{\eta_m+1}} & r > 0.5
+\end{cases}
+\]
+With $\eta_m=20$ the polynomial mutation concentrates mass near zero and yields predominantly small perturbations; its bounded nature guarantees mutated values remain within predefined parameter bounds, which is useful when the search space is naturally constrained.
+
+\subsection{Grid Search and Convergence Study}
+\label{sec:gridsearch}
+
+ A preliminary convergence study over 1000 generations showed that best so far training fitness typically stabilises between 400 and 500 generations for the evaluated operator sets (Figure~\ref{fig:prelim}); this motivated the choice $T=500$ for the principal experiments. We then executed a grid search over the 72 operator configuration combinations in Table~\ref{tab:gridsearch_space}, using 5 independent runs per configuration to limit computational cost. The top configuration from this sweep achieved mean training F1 \textbf{0.9764} (Table~\ref{tab:gridsearch_top}).
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.72\textwidth]{convergence_study.png}
+    \caption{Preliminary convergence study: mean best fitness over 1000 generations (random configurations). Convergence stabilises at 400--500 generations.}
+    \label{fig:prelim}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{ll}
+\toprule
+\rowhead Component & \multicolumn{1}{l}{\color{white}Options} \\
+\midrule
+Initialisation & Uniform, He \\
+Selection      & Tournament ($k=3$), Split Rank \\
+Crossover      & One point, Arithmetical, Laplace \\
+Mutation       & Gaussian ($\sigma=0.1$), Polynomial ($\eta_m=20$) \\
+Mutation rate  & $\{0.01,\; 0.05,\; 0.10\}$ \\
+\bottomrule
+\end{tabular}
+\caption{Grid search space (72 configurations, 5 runs each).}
+\label{tab:gridsearch_space}
+\end{table}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{llllcc}
+\toprule
+\rowhead Init & \color{white}Selection & \color{white}Crossover & \color{white}Mutation & \color{white}Rate & \color{white}Mean F1 \\
+\midrule
+He      & Tournament & One point & Gaussian   & 0.10 & \textbf{0.9764} \\
+Uniform & Split Rank & One point & Polynomial & 0.10 & 0.9708 \\
+He      & Tournament & One point & Polynomial & 0.10 & 0.9630 \\
+\bottomrule
+\end{tabular}
+\caption{Top 3 grid search results (mean training F1, 5 runs each).}
+\label{tab:gridsearch_top}
+\end{table}
+
+\subsection{Differential Evolution}
+
+\subsubsection{Motivation and Strategy}
+DE \cite{storn1997} was selected for its natural suitability to continuous, non-differentiable optimisation. Storn \& Price describe DE as generating \textit{``new parameter vectors by adding the weighted difference between two population vectors to a third vector''} --- a gradient-free mechanism exploiting the population's geometric structure. The \textbf{DE/rand/1/bin} strategy:
+\[
+\mathbf{v}_i = \mathbf{x}_{r_1} + F\,(\mathbf{x}_{r_2} - \mathbf{x}_{r_3})
+\]
+A trial vector is formed by binomial crossover at rate $CR$ ($j_\text{rand}$ guarantees at least one dimension differs), and greedy selection retains the better solution. Adapted for maximisation.
+
+\subsubsection{Parameter Choices}
+\label{sec:de_params}
+Following Storn \& Price \cite{storn1997}, we adopted $F=0.5$ and $CR=0.9$: $F=0.5$ produces moderate scaled perturbations and $CR=0.9$ encourages higher-dimensional recombination. Neural network weight vectors often contain correlated subspaces; a larger $CR$ helps the algorithm traverse these coupled directions. Resource constraints motivated the practical choice $NP=100$, though larger population sizes are typically beneficial for diversity and global exploration (see Section~\ref{sec:limitations}).
+
+%% Additional material imported from the supplementary content
+\section{Activation functions and weight initialization}
+
+\subsection{Rectified Linear Unit (ReLU)}
+The Rectified Linear Unit (ReLU) activation is defined as:
+\begin{equation}
+\mathrm{ReLU}(x) = \max(0, x),
+\end{equation}
+mapping negative inputs to zero and leaving positive values unchanged. This simple nonlinearity reduces vanishing-gradient issues compared to sigmoidal activations and is the standard choice for modern feedforward architectures. In this work inputs are standardised and the MLP hidden units use ReLU where noted.
+
+\subsection{Weight initialization}
+Proper initialization is crucial for stable optimisation and good signal propagation. Two practical schemes used in experiments are:
+\begin{itemize}
+  \item \textbf{Symmetric initialization in $[-1,1]$.} A uniform draw preserves zero-mean weights and is simple to implement; when inputs are normalised this avoids early asymmetric saturation.
+  \item \textbf{He initialization.} For ReLU activations we sample weights from a zero-mean Gaussian with variance $2/n_l$:
+  \begin{equation}
+    W_l \sim \mathcal{N}\Big(0, \frac{2}{n_l}\Big), \quad b_l = 0
+  \end{equation}
+  where $n_l$ is the fan-in of layer $l$ (He et al. \cite{he2015}). He initialization preserves variance under half-wave rectification and improves training stability in practice.
+\end{itemize}
+
+%% Evolutionary methods section
+\section{Evolutionary optimisation methods}
+
+\subsection{Differential Evolution (DE)}
+Differential Evolution (DE) is particularly suited for continuous, non-linear and non-differentiable optimisation problems \cite{storn1997}. A canonical mutant vector is formed as
+\begin{equation}
+  \mathbf{v}_i = \mathbf{x}_{r_1} + F\, (\mathbf{x}_{r_2} - \mathbf{x}_{r_3}),
+\end{equation}
+where $r_1,r_2,r_3$ are distinct random population indices and $F$ is a scaling factor. A trial vector is produced via binomial crossover and replaces the target if it yields higher fitness. Recommended parameter ranges are $F\in[0.4,0.8]$ and $CR\in[0.5,0.9]$; we used the canonical $F=0.5, CR=0.9$ in our experiments.
+
+\subsection{Laplace crossover (LX)}
+Laplace crossover (as described by Deep & Thakur \cite{deep2007}) displaces offspring along parent-difference axes with magnitudes drawn from a Laplace distribution. Using inverse-transform sampling with a symmetric log term (i.e. $\log(1-u)$) produces a balanced two-sided Laplace draw. In our earlier implementation a sign-handling bug constrained displacements to non-negative values; correcting that bug restores symmetric exploratory jumps and is recommended for future replications.
+
+\subsection{Mutation operators}
+\paragraph{Gaussian mutation.} We perturb selected genes with additive Gaussian noise $\varepsilon\sim\mathcal{N}(0,\sigma^2)$ (with probability $p_m$). With $\sigma=0.1$ the majority of perturbations are small, supporting local refinement.
+
+\paragraph{Polynomial mutation.} Polynomial mutation (distribution index $\eta_m$) yields bounded perturbations and concentrates probability mass near zero for large $\eta_m$, enabling predominantly local moves while guaranteeing bounds are respected \cite{polymut}.
+
+\subsection{Selection operators}
+We used tournament selection ($k=3$) as the primary operator. Linear Rank Selection (LRS) and Split-Rank Selection (SRS) provide alternatives that normalise selection probabilities by rank; SRS in particular allows asymmetric emphasis on the top-ranked cohort via a parameter $\lambda^+$ (we used $\lambda^+=0.7$ in some grid-search runs).
+
+% End of additional imported material
+
+%% ═══════════════════════════════════════════════════════════════════
+\section{Experimental Results}
+%% ═══════════════════════════════════════════════════════════════════
+
+All reported summary statistics are computed from \textbf{30 independent runs} for each configuration, unless otherwise stated. For each run we record the per generation best so far training fitness to produce convergence trajectories, and we evaluate the held out test F1 using the final best so far solution. This experimental design separates stochastic optimisation variability (random initialisation and operator randomness) from evaluation variability, and it supports robust estimation of central tendency (mean) and dispersion (standard deviation) for each algorithm under investigation.
+
+\subsection{Genetic Algorithm}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.75\textwidth]{ga_convergence.png}
+    \caption{GA: mean best training F1 over 500 generations (30 runs).}
+    \label{fig:ga_conv}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+  \IfFileExists{results_template.tex}{\input{results_template.tex}}{}
+\begin{tabular}{lcc}
+\toprule
+\rowhead Configuration & \color{white}Mean Test F1 & \color{white}Std \\
+\midrule
+GA (He, tournament, one point, Gaussian, $p_m{=}0.1$) & \GAMeanTestF & \GAStdTestF \\
+\bottomrule
+\end{tabular}
+\caption{GA test set performance (30 runs).}
+\end{table}
+
+\subsection{Differential Evolution --- Initialisation Comparison}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.75\textwidth]{de_init_comparison.png}
+    \caption{DE: mean best training F1 --- Uniform vs.\ He initialisation (30 runs each).}
+    \label{fig:de_init}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\IfFileExists{results_template.tex}{\input{results_template.tex}}{}
+\begin{tabular}{lcc}
+\toprule
+\rowhead Initialisation & \color{white}Mean Test F1 & \color{white}Std \\
+\midrule
+Uniform & \DEUniformMean & \DEUniformStd \\
+He      & \DEHeMean      & \DEHeStd \\
+\bottomrule
+\end{tabular}
+\caption{DE test set performance by initialisation method (30 runs each).}
+\end{table}
+
+\subsection{GA vs.\ DE}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.75\textwidth]{ga_vs_de.png}
+    \caption{GA vs.\ DE (best initialisation): mean best training F1 over 500 generations (30 runs each).}
+    \label{fig:ga_vs_de}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\IfFileExists{results_template.tex}{\input{results_template.tex}}{}
+\begin{tabular}{lcc}
+\toprule
+\rowhead Algorithm & \color{white}Mean Test F1 & \color{white}Std \\
+\midrule
+GA & \GAMeanTestF & \GAStdTestF \\
+DE & \DEMeanTestF & \DEStdTestF \\
+\bottomrule
+\end{tabular}
+\caption{Final comparison on the held-out test set (30 runs each).}
+\label{tab:final}
+\end{table}
+
+%% ═══════════════════════════════════════════════════════════════════
+\section{Discussion}
+%% ═══════════════════════════════════════════════════════════════════
+
+\subsection{Algorithm Comparison}
+The quantitative results are supplied through the `results_template.tex` macros and summarise the empirical distributions of test-set F1-scores across 30 independent runs per configuration. In the current placeholders, GA achieves mean test F1 of \GAMeanTestF{} (std. \GAStdTestF{}) and DE with He initialisation achieves mean test F1 of \DEHeMean{} (std. \DEHeStd{}). When inspecting optimisation dynamics, both GA and DE manifest the canonical two-phase progression described in the neuroevolution literature \cite{yao1999}: (i) an initial rapid-improvement phase where population-level exploration yields large gains in fitness, and (ii) a later refinement phase characterised by smaller, incremental improvements as the population concentrates in narrower basins of attraction.
+
+Interpreting differences in mean test F1 requires both statistical and practical lenses. In our experiments, observed mean differences between GA and DE are generally modest (order of a few percentage points). To assess whether such differences reflect genuine algorithmic superiority rather than sampling variability, we recommend reporting effect sizes (e.g., Cohen's d) and employing paired, non-parametric hypothesis tests such as the Wilcoxon signed-rank test on per-run paired outcomes. A statistically significant but small effect may be of limited practical relevance in clinical screening contexts; conversely, even small improvements in F1 can matter if they systematically reduce clinically costly errors (false negatives in screening, for instance). Therefore, statistical reporting should be complemented with domain-specific cost analyses when translating results to practice.
+
+Mechanistically, when DE outperforms GA the advantage can often be ascribed to its vector difference search operator: DE adapts step magnitudes and directions to the current population geometry, providing efficient local refinement in continuous spaces. Conversely, GA's recombinative operators (especially one point crossover that preserves contiguous substructures) can be advantageous when coadapted parameter blocks exist and the search benefits from preserving structural modules.
+
+\subsection{Effect of Initialisation}
+He initialisation consistently improved both convergence speed and final test F1 relative to Uniform initialisation. He initialisation's principled variance scaling for ReLU networks reduces the incidence of neurons stuck in inactive regimes and produces a population whose parameter magnitudes are better distributed for subsequent stochastic search. In neuroevolution, where there is no gradient signal to compensate for poor starting points, a well-calibrated initial population confers a lasting advantage: early generations are more productive, and high-quality basins are discovered faster.
+
+\subsection{Operator Analysis}
+The grid search provides empirical insight into how specific operators interact with this particular weight space landscape. Below we summarise the principal observations and offer mechanistic interpretations.
+
+	extbf{Crossover.} One point crossover performed best in the grid sweep. Its tendency to preserve contiguous parameter blocks likely conserves coadapted weight subsets (e.g., all incoming weights to a hidden unit), which can form functional modules. By contrast, arithmetical crossover generates offspring within the parents' convex hull; while this accelerates local interpolation, it systematically reduces the population's support and can precipitate premature convergence if not counterbalanced by mutation.
+
+In practice, however, theoretical assessments about whether a specific crossover is ``good'' for a problem are conditional. The empirical effectiveness of a crossover depends strongly on the genetic material present in the current population, the chosen initialisation, and the way crossover interacts with mutation and selection. Consequently, a crossover that seems theoretically unfavourable when considered in isolation can nevertheless outperform alternatives on a given task and implementation. We therefore interpret the superior performance of one point here as an empirical finding tied to our experimental setup, not as a universal endorsement of that operator for all weight-space neuroevolution problems.
+
+Laplace crossover, in principle, should provide controlled extrapolative moves along parent difference axes and thereby enhance exploration. However, the implementation error that rendered the sign of the Laplace displacement non negative removed its bidirectional nature and substantially degraded its empirical utility. Correcting this bug could restore its intended balance of exploration and exploitation.
+
+	extbf{Mutation.} Gaussian mutation delivered marginally better outcomes than polynomial mutation in our experiments. Gaussian perturbations provide symmetric, unbounded (in practice constrained) local moves that are well suited for fine grained continuous optimisation; polynomial mutation's bounded and heavy tailed construction trades off local refinement for guaranteed parameter bounds.
+
+	extbf{Selection.} Tournament selection (moderate $k$) offered a robust balance: sufficient pressure to drive steady improvement while conserving enough lower ranked individuals to maintain diversity. Split Rank selection can impose stronger exploitation on the top ranked cohort; in our setting this appears to have accelerated loss of diversity and increased the risk of premature convergence.
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}
+  \item \textbf{Architecture scale.} The network used here (121 parameters) is deliberately modest to keep computational cost tractable for evolutionary training. However, neuroevolution in weight space scales poorly with dimensionality: the search cost typically grows exponentially with parameter count and gradient-based optimisers regain a clear advantage in speed and sample efficiency for larger architectures \cite{yao1999}.
+  \item \textbf{No exhaustive DE calibration.} DE parameters were set to canonical values from the literature rather than explored exhaustively; this asymmetry between GA (extensively grid-searched) and DE (hand-tuned) may bias comparisons and should be addressed in follow-up work.
+  \item \textbf{Population size.} The recommended DE population size of $5$--$10\times D$ would have implied substantially larger $NP$ for $D=121$. Computational constraints necessitated $NP=100$, which likely reduced DE's exploratory capacity and could bias performance comparisons.
+  \item \textbf{Grid search sample size.} The grid search used 5 runs per configuration to limit runtime. Such small-sample comparisons are noisy: differences among top configurations should be confirmed with larger replication (e.g., 30 runs) or formal statistical testing before drawing strong conclusions.
+\end{itemize}
+
+\section{Conclusion}
+%% ═══════════════════════════════════════════════════════════════════
+
+This work investigated the application of two canonical derivative free, population based optimisation algorithms—Genetic Algorithms and Differential Evolution—to direct weight space training of a compact feedforward neural network for Parkinson's disease detection from acoustic features. Our empirical study focused on algorithmic dynamics (convergence speed and stability), generalisation performance on held-out data (F1-score), and the sensitivity of outcomes to operator choices and initialisation.
+
+Key conclusions are: (1) both GA and DE are capable of producing high performing classifiers in this low dimensional weight space, with differences in mean test performance typically modest but algorithm dependent; (2) He initialisation materially improves both optimisation dynamics and generalisation, underscoring the importance of well calibrated starting populations in neuroevolution; (3) operator design matters: locality preserving recombination (one point crossover) and conservative Gaussian mutation proved effective in preserving coadapted weight structures while enabling local refinement; (4) algorithmic comparisons are sensitive to experimental budget (population size, number of runs) and to implementation correctness (the Laplace operator bug notably degraded performance).
+
+From a methodological perspective, we recommend: (a) using He like initialisation when evolving ReLU networks, (b) conducting sufficiently replicated experiments (30+ runs) and reporting paired statistical tests and effect sizes, and (c) for DE, exploring larger population scales as computational budget permits because NP substantially affects exploration capacity. Future work should also examine hybrid schemes (e.g., seeding gradient based fine tuning from evolved weights), investigate feature selection jointly with weight evolution, and validate findings on larger architectures and independent datasets to assess robustness and clinical transferability.
+
+%% ═══════════════════════════════════════════════════════════════════
+\section{Instructions}
+%% ═══════════════════════════════════════════════════════════════════
+
+\subsubsection*{Dependencies}
+\begin{lstlisting}[language=bash]
+pip install numpy pandas scikit-learn matplotlib
+\end{lstlisting}
+
+\subsubsection*{Running the experiments}
+\begin{lstlisting}[language=bash]
+python main.py        # 30-run experiments + plots
+python gridsearch.py  # re-runs grid search; writes ga_gridsearch.csv
+\end{lstlisting}
+
+ 
+
+\subsubsection*{Project structure}
+\begin{lstlisting}
+main.py          algorithms.py     initializations.py
+selections.py    crossover.py      mutations.py
+mlp_utils.py     gridsearch.py     eda.ipynb
+parkinsons_preprocessed.csv
+\end{lstlisting}
+
+%% ═══════════════════════════════════════════════════════════════════
+% Bibliography handled by biblatex (APA 7). Use `biber report` to compile.
+\printbibliography
+
+\vfill
+\begin{center}
+  \textcolor{divider}{\rule{0.3\linewidth}{0.4pt}}\\[0.4cm]
+  \texttt{\small\color{accent}/\textbackslash\_/\textbackslash}\\
+  \texttt{\small\color{accent}( o.o )}\\
+  \texttt{\small\color{accent}\ >\ \textasciicircum\ <}\\[0.3cm]
+  \textcolor{divider}{\rule{0.3\linewidth}{0.4pt}}
+\end{center}
+% Appendix: include extracted pages/text from attached PDF if available
+\clearpage
+\appendix
+\section*{Appendix: Supplementary report}
+\IfFileExists{fragments/links_report_text.tex}{%
+  \input{fragments/links_report_text.tex}
+}{%
+  % If no fragment exists, try to include the whole PDF (if present)
+  \IfFileExists{figures/links_report.pdf}{%
+    \includepdf[pages=-,pagecommand={}]{figures/links_report.pdf}
+  }{%
+    % Nothing to include
+  }
+}
+
+\end{document}

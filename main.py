@@ -1,4 +1,5 @@
 import pandas as pd
+import random
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
@@ -53,6 +54,7 @@ if __name__=='__main__':
 
 # Best params from gridsearch: initialize_population_he, tournament_selection,
 # one_point_crossover, gaussian_mutation, mutation_rate=0.1 → avg_fitness=0.9764
+
 histories_ga, test_fitnesses_ga = [], []
 for i in range(30):
     best_sol, history = genetic_algorithm(
@@ -96,7 +98,7 @@ for ini in initialization:
         random.seed(n)
         np.random.seed(n)
         
-        best_sol, train_fit = differential_evolution(
+        best_sol, train_fit, history = differential_evolution(
             population_size  = 100,
             total_weights    = total_weights,
             generations      = 500,
