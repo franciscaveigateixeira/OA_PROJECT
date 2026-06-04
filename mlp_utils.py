@@ -95,9 +95,12 @@ def fitness_function(solution, model, layer_sizes, X, y):
 
 #plot
 
-def plot_history(history , title =" Fitness over Iterations "):
-    plt.plot(history)
+def plot_history(*histories, labels=None, title="Fitness over Iterations"):
+    for i in range(len(histories)):
+        plt.plot(histories[i], label=labels[i] if labels else None)
     plt.xlabel("Generations")
     plt.ylabel("Fitness")
     plt.title(title)
+    if labels:
+        plt.legend()
     plt.show()
