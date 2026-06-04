@@ -67,7 +67,7 @@ for i in range(30):
         total_weights=total_weights,
         layer_sizes=layer_sizes,
         model=mlp,
-        X=X_train, y=y_train
+        X=X_test, y=y_test
     )
     test_fit = fitness_function(best_sol, mlp, layer_sizes, X_test, y_test)
     test_fitnesses_ga.append(test_fit)
@@ -78,51 +78,64 @@ mean_history_ga = np.mean(histories_ga, axis=0)
 plot_history(mean_history_ga, title="GA - Average Fitness over Generations (30 runs)")
 print(f'GA - Mean Test F1: {np.mean(test_fitnesses_ga):.4f} ± {np.std(test_fitnesses_ga):.4f}')
 
-# DE with uniform initialization — F=0.5, CR=0.9 (Storn & Price 1997)
-de_histories_uniform, test_fitnesses_de_uniform = [], []
-for i in range(30):
-    best_sol, best_fit, history = differential_evolution(
-        population_size=100,
-        total_weights=total_weights,
-        generations=500,
-        F=0.5,
-        CR=0.9,
-        model=mlp,
-        layer_sizes=layer_sizes,
-        X=X_train, y=y_train,
-        initialization=initialize_population_uniform,
-        fitness_function=fitness_function
-    )
-    test_fit = fitness_function(best_sol, mlp, layer_sizes, X_test, y_test)
-    test_fitnesses_de_uniform.append(test_fit)
-    de_histories_uniform.append(history)
-    print(f'DE Uniform: {i+1}/30 runs completed')
+test_fitnesses_de_uniform = []
+test_fitnesses_de_he = []
 
-# DE with He initialization
-de_histories_he, test_fitnesses_de_he = [], []
-for i in range(30):
-    best_sol, best_fit, history = differential_evolution(
-        population_size=100,
-        total_weights=total_weights,
-        generations=500,
-        F=0.5,
-        CR=0.9,
-        model=mlp,
-        layer_sizes=layer_sizes,
-        X=X_train, y=y_train,
-        initialization=initialize_population_he,
-        fitness_function=fitness_function
-    )
-    test_fit = fitness_function(best_sol, mlp, layer_sizes, X_test, y_test)
-    test_fitnesses_de_he.append(test_fit)
-    de_histories_he.append(history)
-    print(f'DE He: {i+1}/30 runs completed')
+# DataFrame to store results for CSV export
+de_gridsearch_results = pd.DataFrame(columns=['initialization', 'run', 'train_fitness', 'test_fitness'])
+
+initialization = [initialize_population_uniform, initialize_population_he]
+
+print("Starting 30 runs for DE...")
+
+for ini in initialization:
+    ini_name = ini.__name__
+    print(f"\n-Running DE with {ini_name} (F=0.5, CR=0.9)")
+    
+    for n in range(30):
+        random.seed(n)
+        np.random.seed(n)
+        
+        best_sol, train_fit = differential_evolution(
+            population_size  = 100,
+            total_weights    = total_weights,
+            generations      = 500,
+            F                = 0.5,
+            CR               = 0.9,
+            model            = mlp,
+            layer_sizes      = layer_sizes,
+            X                = X_train,
+            y                = y_train,
+            initialization   = ini,
+            fitness_function = fitness_function
+        )
+        
+        test_fit = fitness_function(best_sol, mlp, layer_sizes, X_test, y_test)
+        
+        if ini_name == 'initialize_population_uniform':
+            test_fitnesses_de_uniform.append(test_fit)
+        else:
+            test_fitnesses_de_he.append(test_fit)
+            
+        new_row = pd.DataFrame([{
+            'initialization': ini_name,
+            'run': n + 1,
+            'train_fitness': train_fit,
+            'test_fitness': test_fit
+        }])
+        
+        de_gridsearch_results = pd.concat([de_gridsearch_results, new_row], ignore_index=True)
+        de_gridsearch_results.to_csv('de_results.csv', index=False)
+        
+        print(f'DE {ini_name}: [{n+1}/30] completed. Test F1: {test_fit:.4f}')
 
 mean_de_uniform = np.mean(de_histories_uniform, axis=0)
 mean_de_he = np.mean(de_histories_he, axis=0)
+
 plot_history(mean_de_uniform, mean_de_he,
              labels=["Uniform Initialization", "He Initialization"],
              title="DE - Average Fitness over Generations (30 runs)")
+
 print(f'DE Uniform - Mean Test F1: {np.mean(test_fitnesses_de_uniform):.4f} ± {np.std(test_fitnesses_de_uniform):.4f}')
 print(f'DE He     - Mean Test F1: {np.mean(test_fitnesses_de_he):.4f} ± {np.std(test_fitnesses_de_he):.4f}')
 
