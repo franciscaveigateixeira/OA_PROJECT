@@ -17,7 +17,6 @@ def genetic_algorithm(initialization, fitness_function, selection, crossover, mu
     for i in range(n_iter):
         new_population = []
 
-        #elitism
         while len(new_population) < pop_size:
             parent1,parent2 = selection(population, fitness), selection(population, fitness)
             child1,child2 = crossover(parent1,parent2)
@@ -28,6 +27,7 @@ def genetic_algorithm(initialization, fitness_function, selection, crossover, mu
         fitness = [fitness_function(ind, model, layer_sizes, X, y) for ind in population]
         winner_index = np.argmax(fitness)
 
+        #elitism
         if fitness[winner_index] > best_fitness:
             best_solution, best_fitness = population[winner_index], fitness[winner_index]
 
@@ -50,6 +50,7 @@ def differential_evolution(population_size, total_weights, generations, F, CR, m
     population = initialization(population_size, total_weights, layer_sizes)
         
     fitness = [fitness_function(ind, model, layer_sizes, X, y) for ind in population]
+    history = []
 
     for gen in range(generations):
         new_population = []
@@ -82,6 +83,7 @@ def differential_evolution(population_size, total_weights, generations, F, CR, m
         population = new_population
         best_fitness = max(fitness)
         print(f"Generation {gen + 1}: Best F1 = {best_fitness:.4f}")
+        history.append(best_fitness)
 
     best_idx = np.argmax(fitness)
-    return population[best_idx], fitness[best_idx]
+    return population[best_idx], fitness[best_idx], history
