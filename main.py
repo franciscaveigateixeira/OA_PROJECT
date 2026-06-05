@@ -54,9 +54,13 @@ if __name__=='__main__':
 
 # Best params from gridsearch: initialize_population_he, tournament_selection,
 # one_point_crossover, gaussian_mutation, mutation_rate=0.1 → avg_fitness=0.9764
+ga_results = pd.DataFrame(columns=['run', 'train_fitness', 'test_fitness'])
 
 histories_ga, test_fitnesses_ga = [], []
 for i in range(30):
+    random.seed(i)
+    np.random.seed(i)
+
     best_sol, history = genetic_algorithm(
         initialization=initialize_population_he,
         fitness_function=fitness_function,
@@ -74,6 +78,16 @@ for i in range(30):
     test_fit = fitness_function(best_sol, mlp, layer_sizes, X_test, y_test)
     test_fitnesses_ga.append(test_fit)
     histories_ga.append(history)
+
+    new_row = pd.DataFrame([{
+            'run': i + 1,
+            'train_fitness': history[-1],
+            'test_fitness': test_fit
+        }])
+    
+    ga_results = pd.concat([ga_results, new_row], ignore_index=True)
+    ga_results.to_csv('ga_results.csv', index=False)
+
     print(f'GA: {i+1}/30 runs completed')
 
 mean_history_ga = np.mean(histories_ga, axis=0)
