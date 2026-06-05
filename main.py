@@ -56,9 +56,8 @@ if __name__=='__main__':
 # one_point_crossover, gaussian_mutation, mutation_rate=0.1 → avg_fitness=0.9764
 
 histories_ga, test_fitnesses_ga = [], []
-test_histories_ga = []
 for i in range(30):
-    best_sol, history, test_history = genetic_algorithm(
+    best_sol, history = genetic_algorithm(
         initialization=initialize_population_he,
         fitness_function=fitness_function,
         selection=tournament_selection,
@@ -70,19 +69,16 @@ for i in range(30):
         total_weights=total_weights,
         layer_sizes=layer_sizes,
         model=mlp,
-        X=X_train, y=y_train,
-        X_test=X_test, y_test=y_test
+        X=X_train, y=y_train
     )
     test_fit = fitness_function(best_sol, mlp, layer_sizes, X_test, y_test)
     test_fitnesses_ga.append(test_fit)
     histories_ga.append(history)
-    test_histories_ga.append(test_history)
     print(f'GA: {i+1}/30 runs completed')
 
 mean_history_ga = np.mean(histories_ga, axis=0)
-mean_test_history_ga = np.mean(test_histories_ga, axis=0)
-plot_history(mean_history_ga, mean_test_history_ga,
-             labels=["Training", "Test"],
+plot_history(mean_history_ga,
+             labels=["GA Training"],
              title="GA - Average Fitness over Generations (30 runs)")
 print(f'GA - Mean Test F1: {np.mean(test_fitnesses_ga):.4f} ± {np.std(test_fitnesses_ga):.4f}')
 
@@ -93,8 +89,6 @@ test_fitnesses_de_he = []
 #history
 de_histories_uniform = []
 de_histories_he = []
-de_test_histories_uniform = []
-de_test_histories_he = []
 
 # DataFrame to store results for CSV export
 de_gridsearch_results = pd.DataFrame(columns=['initialization', 'run', 'train_fitness', 'test_fitness'])
@@ -111,7 +105,7 @@ for ini in initialization:
         random.seed(n)
         np.random.seed(n)
         
-        best_sol, train_fit, history, test_history = differential_evolution(
+        best_sol, train_fit, history = differential_evolution(
             population_size  = 100,
             total_weights    = total_weights,
             generations      = 500,
@@ -122,9 +116,7 @@ for ini in initialization:
             X                = X_train,
             y                = y_train,
             initialization   = ini,
-            fitness_function = fitness_function,
-            X_test           = X_test,
-            y_test           = y_test
+            fitness_function = fitness_function
         )
         
         test_fit = fitness_function(best_sol, mlp, layer_sizes, X_test, y_test)
@@ -132,11 +124,9 @@ for ini in initialization:
         if ini_name == 'initialize_population_uniform':
             test_fitnesses_de_uniform.append(test_fit)
             de_histories_uniform.append(history)
-            de_test_histories_uniform.append(test_history)
         else:
             test_fitnesses_de_he.append(test_fit)
             de_histories_he.append(history)
-            de_test_histories_he.append(test_history)
             
         new_row = pd.DataFrame([{
             'initialization': ini_name,
@@ -152,22 +142,20 @@ for ini in initialization:
 
 mean_de_uniform = np.mean(de_histories_uniform, axis=0)
 mean_de_he = np.mean(de_histories_he, axis=0)
-mean_de_test_uniform = np.mean(de_test_histories_uniform, axis=0)
-mean_de_test_he = np.mean(de_test_histories_he, axis=0)
 
-plot_history(mean_de_uniform, mean_de_test_uniform,
-             labels=["Uniform Training", "Uniform Test"],
+plot_history(mean_de_uniform,
+             labels=["DE Uniform Training"],
              title="DE Uniform - Average Fitness over Generations (30 runs)")
 
-plot_history(mean_de_he, mean_de_test_he,
-             labels=["He Training", "He Test"],
+plot_history(mean_de_he,
+             labels=["DE He Training"],
              title="DE He - Average Fitness over Generations (30 runs)")
 
 print(f'DE Uniform - Mean Test F1: {np.mean(test_fitnesses_de_uniform):.4f} ± {np.std(test_fitnesses_de_uniform):.4f}')
 print(f'DE He     - Mean Test F1: {np.mean(test_fitnesses_de_he):.4f} ± {np.std(test_fitnesses_de_he):.4f}')
 
 # GA vs DE comparison (best DE initialization)
-best_de_test_histories = mean_de_test_he if np.mean(test_fitnesses_de_he) >= np.mean(test_fitnesses_de_uniform) else mean_de_test_uniform
-plot_history(mean_test_history_ga, best_de_test_histories,
-             labels=["GA Test", "DE Test"],
-             title="GA vs DE - Average Test Fitness over Generations (30 runs)")
+best_de_training = mean_de_he if np.mean(test_fitnesses_de_he) >= np.mean(test_fitnesses_de_uniform) else mean_de_uniform
+plot_history(mean_history_ga, best_de_training,
+             labels=["GA Training", "DE Training"],
+             title="GA vs DE - Average Training Fitness over Generations (30 runs)")
